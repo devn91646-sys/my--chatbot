@@ -1,167 +1,445 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Chatbot</title>
+
+  <title>My AI Chatbot</title>
 
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+    }
+
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --user: #2563eb;
+      --bot: #eef2f7;
+      --danger: #dc2626;
+    }
+
+    body.dark {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --border: #374151;
+      --bot: #1f2937;
     }
 
     body {
-      background: #f2f4f7;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .chat-container {
-      width: 100%;
-      max-width: 450px;
-      height: 650px;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
     }
 
-    /* Header */
-    .chat-header {
-      background: #2563eb;
-      color: white;
-      padding: 18px;
+    /* APP */
+    .app {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      height: 100vh;
+      width: 100%;
     }
 
-    .chat-header h2 {
-      font-size: 20px;
+    /* SIDEBAR */
+    .sidebar {
+      width: 270px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      transition: 0.3s;
     }
 
-    .status {
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .new-chat {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .new-chat:hover {
+      background: var(--border);
+    }
+
+    .sidebar-section {
+      color: var(--muted);
       font-size: 12px;
-      opacity: 0.9;
-      margin-top: 3px;
+      margin: 15px 5px 8px;
+      text-transform: uppercase;
     }
 
-    #clearBtn {
-      background: rgba(255,255,255,0.2);
+    .sidebar-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-btn {
+      padding: 10px;
       border: none;
-      color: white;
-      padding: 8px 10px;
-      border-radius: 6px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      border-radius: 8px;
       cursor: pointer;
     }
 
-    #clearBtn:hover {
-      background: rgba(255,255,255,0.3);
+    .side-btn:hover {
+      background: var(--bg);
     }
 
-    /* Chat messages */
-    .chat-box {
+    .sidebar-bottom {
+      margin-top: auto;
+    }
+
+    /* MAIN */
+    .main {
       flex: 1;
-      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* HEADER */
+    .header {
+      height: 65px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+    }
+
+    .menu-btn {
+      display: none;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 23px;
+      cursor: pointer;
+    }
+
+    .header-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .online {
+      font-size: 12px;
+      color: #16a34a;
+      margin-left: auto;
+    }
+
+    /* CHAT */
+    .chat {
+      flex: 1;
       overflow-y: auto;
-      background: #f8fafc;
+      padding: 25px;
+      scroll-behavior: smooth;
+    }
+
+    .welcome {
+      max-width: 700px;
+      margin: 70px auto;
+      text-align: center;
+    }
+
+    .welcome-icon {
+      font-size: 55px;
+      margin-bottom: 15px;
+    }
+
+    .welcome h1 {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .welcome p {
+      color: var(--muted);
+      line-height: 1.6;
     }
 
     .message {
       display: flex;
-      margin-bottom: 15px;
+      gap: 12px;
+      max-width: 850px;
+      margin: 0 auto 22px;
     }
 
-    .message p {
-      max-width: 75%;
-      padding: 11px 14px;
-      border-radius: 15px;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
-
-    .bot {
-      justify-content: flex-start;
-    }
-
-    .bot p {
-      background: #e5e7eb;
-      color: #111827;
-      border-bottom-left-radius: 4px;
-    }
-
-    .user {
+    .message.user {
       justify-content: flex-end;
     }
 
-    .user p {
-      background: #2563eb;
+    .avatar {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bot);
+    }
+
+    .message.user .avatar {
+      order: 2;
+      background: var(--user);
       color: white;
+    }
+
+    .message-content {
+      max-width: 75%;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message.user .message-content {
+      background: var(--user);
+      color: white;
+      padding: 11px 15px;
+      border-radius: 15px;
       border-bottom-right-radius: 4px;
     }
 
-    /* Input area */
-    .input-area {
+    .message.bot .message-content {
+      background: var(--bot);
+      padding: 11px 15px;
+      border-radius: 15px;
+      border-bottom-left-radius: 4px;
+    }
+
+    /* TYPING */
+    .typing {
       display: flex;
-      padding: 12px;
-      border-top: 1px solid #ddd;
-      background: white;
-      gap: 8px;
+      gap: 5px;
+      padding: 15px;
     }
 
-    #userInput {
-      flex: 1;
-      border: 1px solid #d1d5db;
-      border-radius: 25px;
-      padding: 12px 16px;
-      outline: none;
-      font-size: 15px;
-    }
-
-    #userInput:focus {
-      border-color: #2563eb;
-    }
-
-    #sendBtn {
-      border: none;
-      background: #2563eb;
-      color: white;
-      width: 45px;
-      height: 45px;
+    .typing span {
+      width: 7px;
+      height: 7px;
+      background: var(--muted);
       border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes bounce {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+
+      30% {
+        transform: translateY(-5px);
+      }
+    }
+
+    /* INPUT */
+    .input-area {
+      padding: 15px 20px 20px;
+      background: var(--card);
+    }
+
+    .input-box {
+      max-width: 850px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      padding: 7px;
+      border-radius: 14px;
+    }
+
+    #messageInput {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 15px;
+      padding: 10px;
+    }
+
+    #messageInput::placeholder {
+      color: var(--muted);
+    }
+
+    #sendButton {
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
       cursor: pointer;
       font-size: 18px;
     }
 
-    #sendBtn:hover {
-      background: #1d4ed8;
+    #sendButton:hover {
+      background: var(--primary-hover);
     }
 
-    /* Typing animation */
-    .typing {
-      font-style: italic;
-      color: #6b7280;
+    #sendButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      max-width: 850px;
+      margin: 7px auto 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      color: var(--text);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .modal-box h2 {
+      margin-bottom: 10px;
+    }
+
+    .modal-box p {
+      color: var(--muted);
       font-size: 13px;
-      padding: 5px;
+      line-height: 1.5;
+      margin-bottom: 15px;
     }
 
-    /* Mobile */
-    @media (max-width: 500px) {
-      body {
-        align-items: stretch;
+    .modal-box input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .modal-actions button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+
+    .save-key {
+      background: var(--primary);
+      color: white;
+    }
+
+    .cancel-key {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    /* MOBILE */
+    @media (max-width: 700px) {
+      .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        z-index: 50;
       }
 
-      .chat-container {
-        max-width: none;
-        height: 100vh;
-        border-radius: 0;
+      .sidebar.open {
+        left: 0;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      .chat {
+        padding: 18px 12px;
+      }
+
+      .message-content {
+        max-width: 82%;
+      }
+
+      .welcome {
+        margin: 60px auto;
+      }
+
+      .welcome h1 {
+        font-size: 24px;
+      }
+
+      .input-area {
+        padding: 10px;
       }
     }
   </style>
@@ -169,190 +447,754 @@
 
 <body>
 
-  <div class="chat-container">
+<div class="app">
 
-    <!-- Header -->
-    <div class="chat-header">
-      <div>
-        <h2>🤖 My Chatbot</h2>
-        <div class="status">● Online</div>
-      </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
 
-      <button id="clearBtn">Clear</button>
+    <div class="logo">
+      🤖 My AI
     </div>
 
-    <!-- Messages -->
-    <div class="chat-box" id="chatBox">
-      <div class="message bot">
-        <p>Hello! 👋 I'm your chatbot. How can I help you?</p>
-      </div>
+    <button class="new-chat" onclick="newChat()">
+      ＋ New Chat
+    </button>
+
+    <div class="sidebar-section">
+      Settings
     </div>
 
-    <!-- Input -->
+    <div class="sidebar-buttons">
+
+      <button class="side-btn" onclick="openApiModal()">
+        🔑 Groq API Key
+      </button>
+
+      <button class="side-btn" onclick="toggleDarkMode()">
+        🌙 Dark / Light Mode
+      </button>
+
+      <button class="side-btn" onclick="clearChat()">
+        🗑️ Clear Conversation
+      </button>
+
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-section">
+        AI Model
+      </div>
+
+      <button class="side-btn">
+        ⚡ Groq AI
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <header class="header">
+
+      <button class="menu-btn" onclick="toggleSidebar()">
+        ☰
+      </button>
+
+      <div class="header-title">
+        🤖 My AI Chatbot
+      </div>
+
+      <div class="online">
+        ● Ready
+      </div>
+
+    </header>
+
+    <!-- CHAT -->
+    <section class="chat" id="chat">
+
+      <div class="welcome" id="welcome">
+
+        <div class="welcome-icon">
+          🤖
+        </div>
+
+        <h1>How can I help you?</h1>
+
+        <p>
+          Ask me anything. This chatbot uses Groq AI
+          to generate responses.
+        </p>
+
+      </div>
+
+    </section>
+
+    <!-- INPUT -->
     <div class="input-area">
-      <input
-        type="text"
-        id="userInput"
-        placeholder="Type your message..."
-        autocomplete="off"
-      >
 
-      <button id="sendBtn">➤</button>
+      <div class="input-box">
+
+        <input
+          id="messageInput"
+          type="text"
+          placeholder="Message your AI..."
+          autocomplete="off"
+        >
+
+        <button id="sendButton" onclick="sendMessage()">
+          ➤
+        </button>
+
+      </div>
+
+      <div class="hint">
+        Press Enter to send
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- API KEY MODAL -->
+<div class="modal" id="apiModal">
+
+  <div class="modal-box">
+
+    <h2>🔑 Groq API Key</h2>
+
+    <p>
+      Enter your Groq API key here. It will be stored locally
+      in this browser. Do not publish your API key inside
+      this HTML file or GitHub repository.
+    </p>
+
+    <div class="error" id="apiError">
+      Please enter a valid API key.
+    </div>
+
+    <input
+      id="apiKeyInput"
+      type="password"
+      placeholder="gsk_..."
+    >
+
+    <div class="modal-actions">
+
+      <button class="cancel-key" onclick="closeApiModal()">
+        Cancel
+      </button>
+
+      <button class="save-key" onclick="saveApiKey()">
+        Save Key
+      </button>
+
     </div>
 
   </div>
 
-  <script>
-    const chatBox = document.getElementById("chatBox");
-    const userInput = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const clearBtn = document.getElementById("clearBtn");
+</div>
 
-    // Load saved messages
-    window.onload = function () {
-      const savedChat = localStorage.getItem("chatHistory");
 
-      if (savedChat) {
-        chatBox.innerHTML = savedChat;
+<script>
+
+  /* ==========================================
+     CONFIGURATION
+  ========================================== */
+
+  const GROQ_URL =
+    "https://api.groq.com/openai/v1/chat/completions";
+
+  /*
+    You can change the model here.
+
+    Example:
+    llama-3.3-70b-versatile
+  */
+
+  const MODEL =
+    "llama-3.3-70b-versatile";
+
+
+  /* ==========================================
+     ELEMENTS
+  ========================================== */
+
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("messageInput");
+  const sendButton = document.getElementById("sendButton");
+  const sidebar = document.getElementById("sidebar");
+
+
+  /* ==========================================
+     CHAT HISTORY
+  ========================================== */
+
+  let messages = [];
+
+
+  function loadHistory() {
+
+    try {
+
+      const saved =
+        localStorage.getItem("my_ai_chat_history");
+
+      if (saved) {
+
+        messages = JSON.parse(saved);
+
+        messages.forEach(message => {
+
+          addMessageToUI(
+            message.role,
+            message.content
+          );
+
+        });
+
       }
 
-      scrollToBottom();
-    };
+    } catch (error) {
 
-    // Send message
-    function sendMessage() {
-      const message = userInput.value.trim();
+      console.log("Could not load history.");
 
-      if (message === "") {
-        return;
-      }
+    }
 
-      addMessage(message, "user");
+  }
 
-      userInput.value = "";
 
+  function saveHistory() {
+
+    localStorage.setItem(
+      "my_ai_chat_history",
+      JSON.stringify(messages)
+    );
+
+  }
+
+
+  /* ==========================================
+     ADD MESSAGE
+  ========================================== */
+
+  function addMessageToUI(role, text) {
+
+    const welcome =
+      document.getElementById("welcome");
+
+    if (welcome) {
+      welcome.remove();
+    }
+
+    const wrapper =
+      document.createElement("div");
+
+    wrapper.className =
+      "message " +
+      (role === "user" ? "user" : "bot");
+
+
+    const avatar =
+      document.createElement("div");
+
+    avatar.className = "avatar";
+
+    avatar.textContent =
+      role === "user" ? "👤" : "🤖";
+
+
+    const content =
+      document.createElement("div");
+
+    content.className =
+      "message-content";
+
+    content.textContent = text;
+
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(content);
+
+    chat.appendChild(wrapper);
+
+    scrollChat();
+
+  }
+
+
+  /* ==========================================
+     SEND MESSAGE
+  ========================================== */
+
+  async function sendMessage() {
+
+    const text =
+      input.value.trim();
+
+    if (!text) {
+      return;
+    }
+
+
+    const apiKey =
+      localStorage.getItem("groq_api_key");
+
+
+    if (!apiKey) {
+
+      addMessageToUI(
+        "bot",
+        "🔑 Please add your Groq API key first. Open Settings → Groq API Key."
+      );
+
+      return;
+
+    }
+
+
+    input.value = "";
+
+    input.disabled = true;
+
+    sendButton.disabled = true;
+
+
+    /* Add user message */
+
+    messages.push({
+
+      role: "user",
+
+      content: text
+
+    });
+
+
+    addMessageToUI(
+      "user",
+      text
+    );
+
+
+    saveHistory();
+
+
+    /* Typing */
+
+    const typing =
       showTyping();
 
-      setTimeout(() => {
-        removeTyping();
 
-        const response = getBotResponse(message);
+    try {
 
-        addMessage(response, "bot");
-      }, 700);
+      const response =
+        await fetch(
+          GROQ_URL,
+          {
+
+            method: "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json",
+
+              "Authorization":
+                "Bearer " + apiKey
+
+            },
+
+            body:
+              JSON.stringify({
+
+                model: MODEL,
+
+                messages: messages,
+
+                temperature: 0.7,
+
+                max_tokens: 1024
+
+              })
+
+          }
+        );
+
+
+      removeTyping(typing);
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data?.error?.message ||
+          "Groq API request failed."
+        );
+
+      }
+
+
+      const reply =
+        data?.choices?.[0]?.message?.content;
+
+
+      if (!reply) {
+
+        throw new Error(
+          "No response received from AI."
+        );
+
+      }
+
+
+      messages.push({
+
+        role: "assistant",
+
+        content: reply
+
+      });
+
+
+      addMessageToUI(
+        "bot",
+        reply
+      );
+
+
+      saveHistory();
+
+
+    } catch (error) {
+
+      removeTyping(typing);
+
+      console.error(error);
+
+
+      addMessageToUI(
+        "bot",
+        "❌ Error: " + error.message
+      );
+
     }
 
-    // Add message to chat
-    function addMessage(text, sender) {
-      const messageDiv = document.createElement("div");
 
-      messageDiv.classList.add("message", sender);
+    input.disabled = false;
 
-      const paragraph = document.createElement("p");
-      paragraph.textContent = text;
+    sendButton.disabled = false;
 
-      messageDiv.appendChild(paragraph);
-      chatBox.appendChild(messageDiv);
+    input.focus();
 
-      saveChat();
-      scrollToBottom();
+  }
+
+
+  /* ==========================================
+     TYPING INDICATOR
+  ========================================== */
+
+  function showTyping() {
+
+    const wrapper =
+      document.createElement("div");
+
+    wrapper.className =
+      "message bot";
+
+
+    const avatar =
+      document.createElement("div");
+
+    avatar.className =
+      "avatar";
+
+    avatar.textContent =
+      "🤖";
+
+
+    const typing =
+      document.createElement("div");
+
+    typing.className =
+      "message-content";
+
+
+    typing.innerHTML = `
+      <div class="typing">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    `;
+
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(typing);
+
+    chat.appendChild(wrapper);
+
+    scrollChat();
+
+    return wrapper;
+
+  }
+
+
+  function removeTyping(element) {
+
+    if (element) {
+      element.remove();
     }
 
-    // Simple chatbot responses
-    function getBotResponse(message) {
+  }
 
-      const text = message.toLowerCase();
+
+  /* ==========================================
+     SCROLL
+  ========================================== */
+
+  function scrollChat() {
+
+    chat.scrollTop =
+      chat.scrollHeight;
+
+  }
+
+
+  /* ==========================================
+     ENTER KEY
+  ========================================== */
+
+  input.addEventListener(
+    "keydown",
+    function(event) {
 
       if (
-        text.includes("hello") ||
-        text.includes("hi") ||
-        text.includes("hey")
+        event.key === "Enter" &&
+        !event.shiftKey
       ) {
-        return "Hello! 👋 Nice to meet you!";
-      }
 
-      if (text.includes("how are you")) {
-        return "I'm doing great! 🤖 Thanks for asking.";
-      }
+        event.preventDefault();
 
-      if (text.includes("your name")) {
-        return "I'm My Chatbot 🤖";
-      }
-
-      if (text.includes("who are you")) {
-        return "I'm a simple chatbot created with HTML, CSS and JavaScript.";
-      }
-
-      if (text.includes("help")) {
-        return "Sure! You can ask me simple questions or customize my responses in the JavaScript code.";
-      }
-
-      if (text.includes("bye")) {
-        return "Goodbye! 👋 Have a great day!";
-      }
-
-      if (text.includes("thank")) {
-        return "You're welcome! 😊";
-      }
-
-      return "I'm still a simple chatbot, so I don't know the answer to that yet. You can add more responses in the JavaScript code!";
-    }
-
-    // Typing indicator
-    function showTyping() {
-      const typing = document.createElement("div");
-
-      typing.classList.add("typing");
-      typing.id = "typing";
-
-      typing.textContent = "🤖 Bot is typing...";
-
-      chatBox.appendChild(typing);
-
-      scrollToBottom();
-    }
-
-    function removeTyping() {
-      const typing = document.getElementById("typing");
-
-      if (typing) {
-        typing.remove();
-      }
-    }
-
-    // Save chat
-    function saveChat() {
-      localStorage.setItem("chatHistory", chatBox.innerHTML);
-    }
-
-    // Clear chat
-    clearBtn.addEventListener("click", function () {
-      chatBox.innerHTML = `
-        <div class="message bot">
-          <p>Hello! 👋 I'm your chatbot. How can I help you?</p>
-        </div>
-      `;
-
-      localStorage.removeItem("chatHistory");
-
-      scrollToBottom();
-    });
-
-    // Send button
-    sendBtn.addEventListener("click", sendMessage);
-
-    // Press Enter
-    userInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
         sendMessage();
+
       }
-    });
 
-    // Scroll to bottom
-    function scrollToBottom() {
-      chatBox.scrollTop = chatBox.scrollHeight;
     }
-  </script>
+  );
 
-</body>
-</html>
+
+  /* ==========================================
+     NEW CHAT
+  ========================================== */
+
+  function newChat() {
+
+    messages = [];
+
+    localStorage.removeItem(
+      "my_ai_chat_history"
+    );
+
+    chat.innerHTML = `
+
+      <div class="welcome" id="welcome">
+
+        <div class="welcome-icon">
+          🤖
+        </div>
+
+        <h1>How can I help you?</h1>
+
+        <p>
+          Ask me anything. This chatbot uses
+          Groq AI to generate responses.
+        </p>
+
+      </div>
+
+    `;
+
+    closeSidebar();
+
+  }
+
+
+  /* ==========================================
+     CLEAR CHAT
+  ========================================== */
+
+  function clearChat() {
+
+    const confirmed =
+      confirm(
+        "Clear the entire conversation?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    newChat();
+
+  }
+
+
+  /* ==========================================
+     API KEY
+  ========================================== */
+
+  function openApiModal() {
+
+    document
+      .getElementById("apiModal")
+      .classList.add("show");
+
+
+    const savedKey =
+      localStorage.getItem(
+        "groq_api_key"
+      );
+
+
+    if (savedKey) {
+
+      document
+        .getElementById("apiKeyInput")
+        .value = savedKey;
+
+    }
+
+  }
+
+
+  function closeApiModal() {
+
+    document
+      .getElementById("apiModal")
+      .classList.remove("show");
+
+  }
+
+
+  function saveApiKey() {
+
+    const key =
+      document
+        .getElementById("apiKeyInput")
+        .value
+        .trim();
+
+
+    const error =
+      document.getElementById(
+        "apiError"
+      );
+
+
+    if (!key || !key.startsWith("gsk_")) {
+
+      error.style.display =
+        "block";
+
+      error.textContent =
+        "Please enter a valid Groq API key.";
+
+      return;
+
+    }
+
+
+    localStorage.setItem(
+      "groq_api_key",
+      key
+    );
+
+
+    error.style.display =
+      "none";
+
+
+    closeApiModal();
+
+
+    addMessageToUI(
+      "bot",
+      "✅ Groq API key saved locally. You can start chatting!"
+    );
+
+  }
+
+
+  /* ==========================================
+     DARK MODE
+  ========================================== */
+
+  function toggleDarkMode() {
+
+    document.body.classList.toggle(
+      "dark"
+    );
+
+
+    const isDark =
+      document.body.classList.contains(
+        "dark"
+      );
+
+
+    localStorage.setItem(
+      "dark_mode",
+      isDark
+    );
+
+  }
+
+
+  function loadDarkMode() {
+
+    const dark =
+      localStorage.getItem(
+        "dark_mode"
+      );
+
+
+    if (dark === "true") {
+
+      document.body.classList.add(
+        "dark"
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================
+     SIDEBAR
+  ========================================== */
+
+  function toggleSidebar() {
+
+    sidebar.classList.toggle(
+      "open"
+    );
+
+  }
+
+
+  function closeSidebar() {
+
+    sidebar.classList.remove(
+      "open"
+```
