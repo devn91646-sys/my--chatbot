@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Chatbot</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f2f4f7;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .chat-container {
+      width: 100%;
+      max-width: 450px;
+      height: 650px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .chat-header {
+      background: #2563eb;
+      color: white;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-header h2 {
+      font-size: 20px;
+    }
+
+    .status {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-top: 3px;
+    }
+
+    #clearBtn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #clearBtn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Chat messages */
+    .chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f8fafc;
+    }
+
+    .message {
+      display: flex;
+      margin-bottom: 15px;
+    }
+
+    .message p {
+      max-width: 75%;
+      padding: 11px 14px;
+      border-radius: 15px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .bot {
+      justify-content: flex-start;
+    }
+
+    .bot p {
+      background: #e5e7eb;
+      color: #111827;
+      border-bottom-left-radius: 4px;
+    }
+
+    .user {
+      justify-content: flex-end;
+    }
+
+    .user p {
+      background: #2563eb;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    /* Input area */
+    .input-area {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid #ddd;
+      background: white;
+      gap: 8px;
+    }
+
+    #userInput {
+      flex: 1;
+      border: 1px solid #d1d5db;
+      border-radius: 25px;
+      padding: 12px 16px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    #userInput:focus {
+      border-color: #2563eb;
+    }
+
+    #sendBtn {
+      border: none;
+      background: #2563eb;
+      color: white;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    #sendBtn:hover {
+      background: #1d4ed8;
+    }
+
+    /* Typing animation */
+    .typing {
+      font-style: italic;
+      color: #6b7280;
+      font-size: 13px;
+      padding: 5px;
+    }
+
+    /* Mobile */
+    @media (max-width: 500px) {
+      body {
+        align-items: stretch;
+      }
+
+      .chat-container {
+        max-width: none;
+        height: 100vh;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="chat-container">
+
+    <!-- Header -->
+    <div class="chat-header">
+      <div>
+        <h2>🤖 My Chatbot</h2>
+        <div class="status">● Online</div>
+      </div>
+
+      <button id="clearBtn">Clear</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-box" id="chatBox">
+      <div class="message bot">
+        <p>Hello! 👋 I'm your chatbot. How can I help you?</p>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <input
+        type="text"
+        id="userInput"
+        placeholder="Type your message..."
+        autocomplete="off"
+      >
+
+      <button id="sendBtn">➤</button>
+    </div>
+
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chatBox");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    // Load saved messages
+    window.onload = function () {
+      const savedChat = localStorage.getItem("chatHistory");
+
+      if (savedChat) {
+        chatBox.innerHTML = savedChat;
+      }
+
+      scrollToBottom();
+    };
+
+    // Send message
+    function sendMessage() {
+      const message = userInput.value.trim();
+
+      if (message === "") {
+        return;
+      }
+
+      addMessage(message, "user");
+
+      userInput.value = "";
+
+      showTyping();
+
+      setTimeout(() => {
+        removeTyping();
+
+        const response = getBotResponse(message);
+
+        addMessage(response, "bot");
+      }, 700);
+    }
+
+    // Add message to chat
+    function addMessage(text, sender) {
+      const messageDiv = document.createElement("div");
+
+      messageDiv.classList.add("message", sender);
+
+      const paragraph = document.createElement("p");
+      paragraph.textContent = text;
+
+      messageDiv.appendChild(paragraph);
+      chatBox.appendChild(messageDiv);
+
+      saveChat();
+      scrollToBottom();
+    }
+
+    // Simple chatbot responses
+    function getBotResponse(message) {
+
+      const text = message.toLowerCase();
+
+      if (
+        text.includes("hello") ||
+        text.includes("hi") ||
+        text.includes("hey")
+      ) {
+        return "Hello! 👋 Nice to meet you!";
+      }
+
+      if (text.includes("how are you")) {
+        return "I'm doing great! 🤖 Thanks for asking.";
+      }
+
+      if (text.includes("your name")) {
+        return "I'm My Chatbot 🤖";
+      }
+
+      if (text.includes("who are you")) {
+        return "I'm a simple chatbot created with HTML, CSS and JavaScript.";
+      }
+
+      if (text.includes("help")) {
+        return "Sure! You can ask me simple questions or customize my responses in the JavaScript code.";
+      }
+
+      if (text.includes("bye")) {
+        return "Goodbye! 👋 Have a great day!";
+      }
+
+      if (text.includes("thank")) {
+        return "You're welcome! 😊";
+      }
+
+      return "I'm still a simple chatbot, so I don't know the answer to that yet. You can add more responses in the JavaScript code!";
+    }
+
+    // Typing indicator
+    function showTyping() {
+      const typing = document.createElement("div");
+
+      typing.classList.add("typing");
+      typing.id = "typing";
+
+      typing.textContent = "🤖 Bot is typing...";
+
+      chatBox.appendChild(typing);
+
+      scrollToBottom();
+    }
+
+    function removeTyping() {
+      const typing = document.getElementById("typing");
+
+      if (typing) {
+        typing.remove();
+      }
+    }
+
+    // Save chat
+    function saveChat() {
+      localStorage.setItem("chatHistory", chatBox.innerHTML);
+    }
+
+    // Clear chat
+    clearBtn.addEventListener("click", function () {
+      chatBox.innerHTML = `
+        <div class="message bot">
+          <p>Hello! 👋 I'm your chatbot. How can I help you?</p>
+        </div>
+      `;
+
+      localStorage.removeItem("chatHistory");
+
+      scrollToBottom();
+    });
+
+    // Send button
+    sendBtn.addEventListener("click", sendMessage);
+
+    // Press Enter
+    userInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    // Scroll to bottom
+    function scrollToBottom() {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
